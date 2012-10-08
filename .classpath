@@ -7,5 +7,29 @@
 	<classpathentry kind="lib" path="lib/build/junit.jar"/>
 	<classpathentry kind="lib" path="lib/build/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/build/lucene-core.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-codec.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-fileupload.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-io.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-lang.jar"/>
+	<classpathentry kind="lib" path="lib/build/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/build/guava.jar"/>
+	<classpathentry kind="lib" path="lib/build/jakarta-regexp.jar"/>
+	<classpathentry kind="lib" path="lib/build/jcl-over-slf4j.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-analyzers.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-grouping.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-highlighter.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-kuromoji.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-memory.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-misc.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-phonetic.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-queries.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-spatial.jar"/>
+	<classpathentry kind="lib" path="lib/build/lucene-spellchecker.jar"/>
+	<classpathentry kind="lib" path="lib/build/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/build/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="lib/build/solr-core.jar"/>
+	<classpathentry kind="lib" path="lib/build/solr-solrj.jar"/>
+	<classpathentry kind="lib" path="lib/build/wstx-asl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
