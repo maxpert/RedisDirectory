@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info
+        organisation="mxp"
+        module="redisdir"
+        status="integration">
+	</info>
+
+	<configurations>
+		<conf name="build" description="Libraries needed to for compilation"/>
+		<conf name="runtime" extends="build" description="Libraries that need to be included with project jar" />
+	</configurations>
+	
+	<dependencies>
+      <dependency conf="build->default" org="junit" name="junit" rev="4.8.2"/>
+      <dependency conf="build->default" org="org.apache.lucene" name="lucene-core" rev="3.6.1"/>
+      <dependency conf="build->default" org="redis.clients" name="jedis" rev="2.1.0"/>
+      <dependency conf="build->default" org="log4j" name="log4j" rev="1.2.16"/>
+    </dependencies>
+    
+</ivy-module>

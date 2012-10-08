@@ -1,0 +1,22 @@
+<ivysettings>
+
+
+	<caches defaultCacheDir="${ivy.home}/.cache"/>
+
+	<settings defaultResolver="maven2.repo" />
+
+	<resolvers>
+		<ibiblio name="maven2.repo" m2compatible="true" />
+		<ibiblio name="java.maven2.repo" root="http://download.java.net/maven/2"
+			m2compatible="true" />
+		<ibiblio name="java.maven.repo" root="http://download.java.net/maven/1"
+			m2compatible="true" />
+	</resolvers>
+
+
+
+	<modules>
+		<module organisation="com.sun.jersey" resolver="java.maven2.repo" />
+	</modules>
+
+</ivysettings>

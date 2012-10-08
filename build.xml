@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RedisDirectory" default="compile.core" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<!-- Ivy begin -->
+	<property name="ivy.install.version" value="2.2.0" />
+	<condition property="ivy.home" value="${env.IVY_HOME}">
+		<isset property="env.IVY_HOME" />
+	</condition>
+
+	<property name="ivy.home" value="${user.dir}" />
+	<property name="ivy.jar.dir" value="${ivy.home}/.ivy" />
+	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+
+	<target name="ivy.install">
+		<mkdir dir="${ivy.jar.dir}" />
+		<get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true" />
+	</target>
+
+	<target name="ivy.init" depends="ivy.install">
+		<path id="ivy.lib.path">
+			<fileset dir="${ivy.jar.dir}" includes="*.jar" />
+		</path>
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+	</target>
+
+	<target name="ivy.fetch" depends="ivy.init">
+		<ivy:retrieve pattern="lib/[conf]/[artifact].[ext]" sync="true" />
+	</target>
+
+	<target name="ivy.clear" depends="ivy.init">
+		<ivy:cleancache />
+	</target>
+
+	<target name="deps" depends="ivy.fetch">
+		<ivy:cachepath pathid="build.classpath" />
+	</target>
+	<!-- Ivy end -->
+
+	<property name="build.dir" value="build" />
+	<property name="src.core.dir" value="src/" />
+	<property name="java.jar.name" value="RedisDirectory" />
+
+	<target name="compile.core" depends="deps">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.dir}/classes" />
+		<javac debug="on" srcdir="${src.core.dir}" destdir="${build.dir}/classes" classpathref="build.classpath" />
+	</target>
+
+	<target name="exec.jar" depends="compile.core">
+		<mkdir dir="${build.dir}/jar" />
+		<jar destfile="${build.dir}/jar/${java.jar.name}.jar" basedir="${build.dir}/classes" duplicate="preserve" update="true">
+			<zipgroupfileset dir="lib/build" includes="**/*.jar" />
+			<manifest>
+				<attribute name="Main-Class" value="mxp.Main" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="lib.jar" depends="compile.core">
+		<mkdir dir="${build.dir}/jar" />
+		<jar destfile="${build.dir}/jar/${java.jar.name}.jar" basedir="${build.dir}/classes" duplicate="preserve" update="true">
+		</jar>
+	</target>
+
+</project>

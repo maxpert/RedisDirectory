@@ -1,0 +1,12 @@
+lib/
+build/
+bin/
+.cache/
+.ivy/
+src/mxp/lucene/store/RedisSplitedFileSharder.java
+src/mxp/Main.java
+src/mxp/DumpIndexWriter.java
+src/test
+.project
+.settings
+.DS_Store
