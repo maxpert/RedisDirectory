@@ -63,6 +63,21 @@ Sharding
 
  Look closely Jedis is doing the complete sharding for us.
 
+Solr Installation
+-----------------
+
+ Place the RedisDirectory.jar file with jedis.jar and commons-pool.jar at your required place. Then modify the solrconf.xml to use RedisDirectoryFactory
+
+```xml
+  <directoryFactory class="mxp.solr.core.RedisDirectoryFactory"/>
+```
+
+Make sure you introduce lib tag to point to the directory containing the RedisDirectory.jar and other jar files
+
+```xml
+    <lib dir="/path/to/your/lib/folder" />
+```
+
 TODO
 ----
 
@@ -73,6 +88,8 @@ I've just started. Have to:
 *   Solr support (already in progress).
 *   Optimize performance.
 *   Redundancy support, maintain multiple copies of a file (or its blocks).
+
+
 
 ## License
 

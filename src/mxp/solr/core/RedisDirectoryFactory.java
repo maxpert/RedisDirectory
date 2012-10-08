@@ -29,7 +29,7 @@ public class RedisDirectoryFactory extends DirectoryFactory{
 
 	@Override
 	public Directory open(String name) throws IOException {
-		RedisDirectory redisDir = new RedisDirectory("piratebay", pool);
+		RedisDirectory redisDir = new RedisDirectory(name, pool);
 		return redisDir;
 	}
 
