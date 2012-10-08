@@ -1,13 +1,19 @@
 package mxp.solr.core;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import mxp.lucene.store.RedisDirectory;
 
+import org.apache.commons.io.FileExistsException;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.Version;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.DirectoryFactory;
 
@@ -30,6 +36,11 @@ public class RedisDirectoryFactory extends DirectoryFactory{
 	@Override
 	public Directory open(String name) throws IOException {
 		RedisDirectory redisDir = new RedisDirectory(name, pool);
+		if( !redisDir.exists() ) {
+			IndexWriter writer = new IndexWriter(redisDir, new IndexWriterConfig(Version.LUCENE_36, new StandardAnalyzer(Version.LUCENE_36)));
+			writer.commit();
+			writer.close();
+		}
 		return redisDir;
 	}
 

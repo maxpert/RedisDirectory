@@ -35,12 +35,19 @@ public class RedisDirectory extends Directory implements Serializable {
 		ShardedJedis rds = redisPool.getResource();
 		String size = rds.hget(dirName, ":size");
 		directorySize = 0;
-		if(size != null && size.length() > 0){
+		try {
 			directorySize = Long.getLong(size);
-		}else{
+		}catch(Exception e){
 			reloadSizeFromFiles();
 		}
 		redisPool.returnResourceObject(rds);
+	}
+	
+	public boolean exists() {
+		ShardedJedis rds = redisPool.getResource();
+		boolean ex = rds.exists(dirName);
+		redisPool.returnResourceObject(rds);
+		return ex;
 	}
 	
 	public void reloadSizeFromFiles() {
