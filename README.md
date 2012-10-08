@@ -25,6 +25,17 @@ Usage
 
 ```java
  // Initlaize ShardedJedisPool according to your settings
+ List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>();
+ JedisShardInfo si = new JedisShardInfo("localhost", 6379);
+ JedisShardInfo si2 = new JedisShardInfo("localhost", 6389);
+ JedisShardInfo si3 = new JedisShardInfo("localhost", 6399);
+ shards.add(si);
+ shards.add(si2);
+ shards.add(si3);
+ 
+ ShardedJedisPool pool = new ShardedJedisPool(new GenericObjectPool.Config(), shards);
+
+ //Intialize 
  RedisDirectory redisDir = new RedisDirectory("max", pool);
  Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
  IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
