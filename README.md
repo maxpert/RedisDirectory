@@ -1,0 +1,89 @@
+Redis storage engine for Lucene 
+===============================
+
+_The repo is under baby stages and in no way production ready; yet it lays the fundamental foundation and aims to be usable in production_. 
+
+
+Requirements
+------------
+
+* Lucene 3.6
+* Apache Ant
+* Jedis 2.0+
+
+Installation
+------------
+
+*   Clone the repo _git clone git@github.com:maxpert/RedisDirectory.git RedisDirectory_
+*   cd RedisDirectory
+*   ant lib.jar to build jar library under build/jar folder (same directory)
+
+Usage
+-----
+
+ Make sure you have the RedisDirectory.jar in you class path (Gradle or Ant can help you). To use it just:
+
+```java
+ // Initlaize ShardedJedisPool according to your settings
+ RedisDirectory redisDir = new RedisDirectory("max", pool);
+ Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+ IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+ IndexWriter writer = new IndexWriter(redisDir, writerConfig);
+
+ //Intialize your document...
+ Document doc = new Document();
+ doc.add(...);
+
+ //Add document to index...
+ writer.addDocument(doc);
+ writer.close();
+
+ redisDir.close();
+```
+
+File is divided into blocks and stored as HASH in redis in binary format that can be loaded on demand. You can customise the block size by modifying the FILE_BUFFER_SIZE in RedisDirectory. *Remember its a 1 time intialization once index is created on a particular size it can't be changed; higher block size causes higher fragmentation*. Example:
+
+```java
+  RedisDirectory.FILE_BUFFER_SIZE = 16 << 10; // Sets 16K block size
+```
+
+Sharding
+--------
+
+ Look closely Jedis is doing the complete sharding for us.
+
+TODO
+----
+
+I've just started. Have to:
+
+*   Rock solid JUNIT test cases for each class.
+*   Solr support (already in progress).
+*   Optimize performance.
+*   Redundancy support, maintain multiple copies of a file (or its blocks).
+
+## License
+
+Copyright (c) 2012 Zohaib Sibte Hassan
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+
