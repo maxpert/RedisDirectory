@@ -69,6 +69,7 @@ TODO
 I've just started. Have to:
 
 *   Rock solid JUNIT test cases for each class.
+*   Enable atomic operations on RedisFile, this will allow multiple connections to manipulate single file.
 *   Solr support (already in progress).
 *   Optimize performance.
 *   Redundancy support, maintain multiple copies of a file (or its blocks).
