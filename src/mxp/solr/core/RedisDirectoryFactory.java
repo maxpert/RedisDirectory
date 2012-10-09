@@ -1,13 +1,11 @@
 package mxp.solr.core;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import mxp.lucene.store.RedisDirectory;
 
-import org.apache.commons.io.FileExistsException;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;

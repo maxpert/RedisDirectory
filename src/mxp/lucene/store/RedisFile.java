@@ -50,7 +50,8 @@ public class RedisFile {
 	protected synchronized void flushBuffer() {
 		if( dirtyBuffer ) {
 			ShardedJedis jd = redisPool.getResource();
-			jd.hset(getPath().getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(currBlock).array(), buffer);
+			String tar = String.format("%s|%016X", getPath(), currBlock);
+			jd.set(tar.getBytes(), buffer);
 			jd.hset(getPath().getBytes(), ":size".getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(fileLength).array());
 			redisPool.returnResource(jd);
 		}
@@ -59,7 +60,8 @@ public class RedisFile {
 	
 	protected synchronized void readBuffer() {
 		ShardedJedis jd = redisPool.getResource();
-		buffer = jd.hget(getPath().getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(currBlock).array());
+		String tar = String.format("%s|%016X", getPath(), currBlock);
+		buffer = jd.get(tar.getBytes());
 		redisPool.returnResource(jd);
 		if( buffer == null || buffer.length != BufferLength ){
 			buffer = new byte [this.BufferLength];

@@ -2,6 +2,7 @@ package mxp.lucene.store;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.lucene.store.Directory;
@@ -9,11 +10,12 @@ import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.SingleInstanceLockFactory;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
 public class RedisDirectory extends Directory implements Serializable {
-	public  static final int FILE_BUFFER_SIZE = 4 * 1024;
+	public  static final int FILE_BUFFER_SIZE = 32 * 1024;
 	private static final long serialVersionUID = 7378532726794782140L;
 	private ShardedJedisPool redisPool;
 	private String dirName;
@@ -71,6 +73,12 @@ public class RedisDirectory extends Directory implements Serializable {
 		ShardedJedis rds = redisPool.getResource();
 		directorySize = dirSize();
 		rds.hset(dirName, ":size", Long.toString(directorySize));
+		
+		//Issue save on each
+		Collection<Jedis> ls = rds.getAllShards();
+		for(Jedis jds: ls){
+			jds.save();
+		}
 		redisPool.returnResourceObject(rds);
 	}
 
