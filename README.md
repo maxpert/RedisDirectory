@@ -78,6 +78,8 @@ Make sure you introduce lib tag to point to the directory containing the RedisDi
     <lib dir="/path/to/your/lib/folder" />
 ```
 
+ *Note* The module connects to localhost:6379 right now (it will be configurable later on)
+
 TODO
 ----
 
