@@ -77,7 +77,7 @@ public class RedisDirectory extends Directory implements Serializable {
 		//Issue save on each
 		Collection<Jedis> ls = rds.getAllShards();
 		for(Jedis jds: ls){
-			jds.save();
+			jds.bgsave();
 		}
 		redisPool.returnResourceObject(rds);
 	}

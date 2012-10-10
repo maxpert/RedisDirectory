@@ -69,16 +69,21 @@ Solr Installation
  Place the RedisDirectory.jar file with jedis.jar and commons-pool.jar at your required place. Then modify the solrconf.xml to use RedisDirectoryFactory
 
 ```xml
-  <directoryFactory class="mxp.solr.core.RedisDirectoryFactory"/>
+<directoryFactory class="mxp.solr.core.RedisDirectoryFactory">
+  <str name="shard">localhost:6399</str>
+  <str name="shard">localhost:6379</str>
+  <str name="shard">localhost:6389</str>
+  <int name="fileBufferSize">65536</int>
+</directoryFactory>
 ```
 
-Make sure you introduce lib tag to point to the directory containing the RedisDirectory.jar and other jar files
+Each name shard points to the redis host string (UNIX sock yet to come). And you can set custom buffer size in bytes 32K is default (if not mentioned). 
+
+*Note:* Make sure you introduce lib tag to point to the directory containing the RedisDirectory.jar and other jar files
 
 ```xml
     <lib dir="/path/to/your/lib/folder" />
 ```
-
- *Note* The module connects to localhost:6379 right now (it will be configurable later on)
 
 TODO
 ----
