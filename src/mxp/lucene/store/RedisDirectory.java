@@ -13,6 +13,7 @@ import org.apache.lucene.store.SingleInstanceLockFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
+import redis.clients.jedis.exceptions.JedisDataException;
 
 public class RedisDirectory extends Directory implements Serializable {
 	public  static int FILE_BUFFER_SIZE = 32 * 1024;
@@ -77,7 +78,12 @@ public class RedisDirectory extends Directory implements Serializable {
 		//Issue save on each
 		Collection<Jedis> ls = rds.getAllShards();
 		for(Jedis jds: ls){
-			jds.bgsave();
+			try{
+				jds.bgsave();
+			}catch(JedisDataException e){
+				System.err.println(e);
+				e.printStackTrace(System.err);
+			}
 		}
 		redisPool.returnResourceObject(rds);
 	}

@@ -77,7 +77,7 @@ Solr Installation
 </directoryFactory>
 ```
 
-Each name shard points to the redis host string (UNIX sock yet to come). And you can set custom buffer size in bytes 32K is default (if not mentioned). 
+Each name shard points to the redis host string (UNIX sock files yet to come). And you can set custom buffer size in bytes 32K is default (if not mentioned). 
 
 *Note:* Make sure you introduce lib tag to point to the directory containing the RedisDirectory.jar and other jar files
 
