@@ -9,12 +9,12 @@ public class RedisFileOutputStream extends IndexOutput implements Cloneable {
 	
 	private RedisFile file;
 	
-	public RedisFileOutputStream(RedisFile fl) {
+	public RedisFileOutputStream(RedisFile fl) throws IOException {
 		file = fl;
 		reset();
 	}
 	
-	public void reset(){
+	public void reset() throws IOException{
 		file.seek(0);
 	}
 

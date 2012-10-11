@@ -16,7 +16,7 @@ import redis.clients.jedis.ShardedJedisPool;
 import redis.clients.jedis.exceptions.JedisDataException;
 
 public class RedisDirectory extends Directory implements Serializable {
-	public  static int FILE_BUFFER_SIZE = 32 * 1024;
+	public  static int FILE_BUFFER_SIZE = 128 * 1024;
 	private static final long serialVersionUID = 7378532726794782140L;
 	private ShardedJedisPool redisPool;
 	private String dirName;

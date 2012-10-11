@@ -19,6 +19,7 @@
       <dependency conf="build->default" org="redis.clients" name="jedis" rev="2.1.0"/>
       <dependency conf="build->default" org="log4j" name="log4j" rev="1.2.16"/>
       <dependency conf="build->default" org="org.apache.solr" name="solr-core" rev="3.6.1"/>
+      <dependency conf="build->default" org="org.xerial.snappy" name="snappy-java" rev="1.0.4.1"/>
             
     </dependencies>
     

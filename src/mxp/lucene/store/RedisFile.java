@@ -1,6 +1,9 @@
 package mxp.lucene.store;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.xerial.snappy.Snappy;
 
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
@@ -18,7 +21,7 @@ public class RedisFile {
 	protected boolean dirtyBuffer;
 	protected byte[] buffer;
 
-	public RedisFile(String name, RedisDirectory dir, ShardedJedisPool pool) {
+	public RedisFile(String name, RedisDirectory dir, ShardedJedisPool pool) throws IOException {
 		this.directory = dir;
 		this.redisPool = pool;
 		this.name = name;
@@ -42,33 +45,37 @@ public class RedisFile {
 		return this.fileLength;
 	}
 	
-	public synchronized void flush() {
+	public synchronized void flush() throws IOException {
 		flushBuffer();
 		directory.reloadSizeFromFiles();
 	}
 	
-	protected synchronized void flushBuffer() {
+	protected synchronized void flushBuffer() throws IOException {
 		if( dirtyBuffer ) {
 			ShardedJedis jd = redisPool.getResource();
 			String tar = String.format("%s|%016X", getPath(), currBlock);
-			jd.set(tar.getBytes(), buffer);
+			byte[] compressed = Snappy.compress(buffer);
+			jd.set(tar.getBytes(), compressed);
 			jd.hset(getPath().getBytes(), ":size".getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(fileLength).array());
 			redisPool.returnResource(jd);
 		}
 		dirtyBuffer = false;
 	}
 	
-	protected synchronized void readBuffer() {
+	protected synchronized void readBuffer() throws IOException {
 		ShardedJedis jd = redisPool.getResource();
 		String tar = String.format("%s|%016X", getPath(), currBlock);
 		buffer = jd.get(tar.getBytes());
 		redisPool.returnResource(jd);
+		if( buffer != null ) {
+			buffer = Snappy.uncompress(buffer);
+		}
 		if( buffer == null || buffer.length != BufferLength ){
 			buffer = new byte [this.BufferLength];
 		}
 	}
 	
-	public void close() {
+	public void close() throws IOException {
 		flush();
 	}
 	
@@ -84,7 +91,7 @@ public class RedisFile {
 		return (i / BufferLength);
 	}
 	
-	public synchronized void seek(long p) {
+	public synchronized void seek(long p) throws IOException {
 		// If seek remains within current block
 		if( blockPos(p) == currBlock ){
 			currPos = p;
@@ -104,7 +111,7 @@ public class RedisFile {
 		return currPos;
 	}
 		
-	public synchronized void read(byte[] buff, int offset, long n) {
+	public synchronized void read(byte[] buff, int offset, long n) throws IOException {
 		int sourceBufferIndex = (int)(currPos % BufferLength);
 		int bytesRead = BufferLength - sourceBufferIndex;
 		int destBufferIndex = offset;
@@ -125,7 +132,7 @@ public class RedisFile {
 		}
 	}
 	
-	public synchronized void write(byte[] buff, int offset, long n){
+	public synchronized void write(byte[] buff, int offset, long n) throws IOException{
 		int sourceBufferIndex = (int)(currPos % BufferLength);
 		int bytesWrite = BufferLength - sourceBufferIndex;
 		int destBufferIndex = offset;
