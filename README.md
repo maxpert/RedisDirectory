@@ -1,7 +1,7 @@
 Redis storage engine for Lucene 
 ===============================
 
-_The repo is under baby stages and in no way production ready; yet it lays the fundamental foundation and aims to be usable in production_. 
+_The repo is under baby stages and in no way production ready; yet it lays the fundamental foundation and aims to be usable in production_. You can read about [my blog post here](http://blog.creapptives.com/post/33172587388/smoking-lucene-on-redis).
 
 
 Requirements
@@ -17,6 +17,12 @@ Installation
 *   Clone the repo _git clone git@github.com:maxpert/RedisDirectory.git RedisDirectory_
 *   cd RedisDirectory
 *   ant lib.jar to build jar library under build/jar folder (same directory)
+
+Features
+--------
+*   Supports Solr 
+*   Supports sharding
+*   Storage level distribution
 
 Usage
 -----
@@ -92,7 +98,6 @@ I've just started. Have to:
 
 *   Rock solid JUNIT test cases for each class.
 *   Enable atomic operations on RedisFile, this will allow multiple connections to manipulate single file.
-*   Solr support (already in progress).
 *   Optimize performance.
 *   Redundancy support, maintain multiple copies of a file (or its blocks).
 

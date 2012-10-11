@@ -10,3 +10,4 @@ src/test
 .project
 .settings
 .DS_Store
+.classpath
