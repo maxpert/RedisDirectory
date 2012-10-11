@@ -96,12 +96,10 @@ TODO
 
 I've just started. Have to:
 
+*   Include support for Snappy compression to compress file block.
 *   Rock solid JUNIT test cases for each class.
 *   Enable atomic operations on RedisFile, this will allow multiple connections to manipulate single file.
-*   Optimize performance.
 *   Redundancy support, maintain multiple copies of a file (or its blocks).
-
-
 
 ## License
 
