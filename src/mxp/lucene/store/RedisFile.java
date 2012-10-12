@@ -17,9 +17,14 @@ public class RedisFile {
 	protected long fileLength;
 	protected long currPos, currBlock;
 	
+	private byte[] nameBytes;
+	private byte[] pathBytes;
+	
 	protected int BufferLength;
 	protected boolean dirtyBuffer;
 	protected byte[] buffer;
+	
+	protected boolean fileExtended;
 
 	public RedisFile(String name, RedisDirectory dir, ShardedJedisPool pool) throws IOException {
 		this.directory = dir;
@@ -30,6 +35,7 @@ public class RedisFile {
 		this.BufferLength = RedisDirectory.FILE_BUFFER_SIZE;
 		this.buffer = null;
 		this.dirtyBuffer = false;
+		this.fileExtended = false;
 		
 		size();
 		readBuffer();
@@ -37,7 +43,7 @@ public class RedisFile {
 	
 	public synchronized long size() {
 		ShardedJedis jd = redisPool.getResource();
-		byte [] p = jd.hget(getPath().getBytes(), ":size".getBytes());
+		byte [] p = jd.hget(directory.getDirNameBytes(), getNameBytes());
 		if( p != null && p.length == Long.SIZE/8 ){
 			this.fileLength = ByteBuffer.wrap(p).asLongBuffer().get();
 		}
@@ -47,16 +53,22 @@ public class RedisFile {
 	
 	public synchronized void flush() throws IOException {
 		flushBuffer();
-		directory.reloadSizeFromFiles();
 	}
 	
 	protected synchronized void flushBuffer() throws IOException {
 		if( dirtyBuffer ) {
 			ShardedJedis jd = redisPool.getResource();
-			String tar = String.format("%s|%016X", getPath(), currBlock);
-			byte[] compressed = Snappy.compress(buffer);
-			jd.set(tar.getBytes(), compressed);
-			jd.hset(getPath().getBytes(), ":size".getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(fileLength).array());
+			if( RedisDirectory.COMPRESSED ){
+				byte[] compressed = Snappy.compress(buffer);
+				jd.set(blockAddress(), compressed);
+			}else{
+				jd.set(blockAddress(), buffer);
+			}
+			if( fileExtended ){
+				jd.hset(directory.getDirNameBytes(), getNameBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(fileLength).array());
+				directory.reloadSizeFromFiles();
+				fileExtended = false;
+			}
 			redisPool.returnResource(jd);
 		}
 		dirtyBuffer = false;
@@ -64,23 +76,35 @@ public class RedisFile {
 	
 	protected synchronized void readBuffer() throws IOException {
 		ShardedJedis jd = redisPool.getResource();
-		String tar = String.format("%s|%016X", getPath(), currBlock);
-		buffer = jd.get(tar.getBytes());
-		redisPool.returnResource(jd);
-		if( buffer != null ) {
+		buffer = jd.get(blockAddress());
+		if( buffer != null && RedisDirectory.COMPRESSED) {
 			buffer = Snappy.uncompress(buffer);
 		}
 		if( buffer == null || buffer.length != BufferLength ){
 			buffer = new byte [this.BufferLength];
 		}
+		redisPool.returnResource(jd);
 	}
 	
-	public void close() throws IOException {
+	private byte[] blockAddress() {
+		ByteBuffer buff = ByteBuffer.allocate(getPathBytes().length+(Long.SIZE/8));
+		buff.put(getPathBytes()).putLong(currBlock);
+		return buff.array();
+	}
+	
+	public synchronized void close() throws IOException {
 		flush();
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public byte[] getNameBytes() {
+		if( nameBytes == null ) {
+			nameBytes = name.getBytes();
+		}
+		return nameBytes;
 	}
 	
 	public long blocksRequired(long size) {
@@ -95,15 +119,20 @@ public class RedisFile {
 		// If seek remains within current block
 		if( blockPos(p) == currBlock ){
 			currPos = p;
-			if( fileLength < currPos ) fileLength = currPos; 
+			if( fileLength < currPos ) {
+				fileLength = currPos;
+				fileExtended = true;
+			}
 			return;
 		}
 		//Seeking somewhere within existing blocks
-		//System.err.printf("%s Miss... %d \n", getPath(), p);
 		flushBuffer();
 		currPos = p;
 		currBlock = blockPos(p);
-		if( fileLength < currPos ) fileLength = currPos;
+		if( fileLength < currPos ) {
+			fileLength = currPos;
+			fileExtended = true;
+		}
 		readBuffer();
 	}
 	
@@ -155,16 +184,23 @@ public class RedisFile {
 		}		
 	}
 	
-	public void delete() {
+	public synchronized void delete() {
 		ShardedJedis jd = redisPool.getResource();
-		jd.del(getPath());
+		jd.hdel(directory.getDirNameBytes(), getPathBytes());
 		redisPool.returnResource(jd);
+		dirtyBuffer = false;
 	}
 
 	public String getPath() {
 		String parent = "";
 		if( directory != null ) parent = directory.getDirName();
 		return String.format("@%s:%s", parent, name);
+	}
+	
+	public byte[] getPathBytes() {
+		if( pathBytes == null )
+			pathBytes = getPath().getBytes();
+		return pathBytes;
 	}
 
 }

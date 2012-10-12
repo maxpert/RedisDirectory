@@ -2,7 +2,9 @@ package mxp.lucene.store;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.store.Directory;
@@ -16,10 +18,13 @@ import redis.clients.jedis.ShardedJedisPool;
 import redis.clients.jedis.exceptions.JedisDataException;
 
 public class RedisDirectory extends Directory implements Serializable {
-	public  static int FILE_BUFFER_SIZE = 128 * 1024;
+	public  static int FILE_BUFFER_SIZE = 256 * 1024;
+	public	static boolean COMPRESSED = false;
+	
 	private static final long serialVersionUID = 7378532726794782140L;
 	private ShardedJedisPool redisPool;
 	private String dirName;
+	private byte[] dirNameBytes;
 	
 	private long directorySize;
 	
@@ -42,20 +47,20 @@ public class RedisDirectory extends Directory implements Serializable {
 	
 	private void open() {
 		ShardedJedis rds = redisPool.getResource();
-		String size = rds.hget(dirName, ":size");
+		byte[] size = rds.hget(getDirNameBytes(), ":size".getBytes());
 		directorySize = 0;
 		try {
-			directorySize = Long.getLong(size);
+			directorySize = ByteBuffer.wrap(size).asLongBuffer().get();
 		}catch(Exception e){
 			reloadSizeFromFiles();
 		}
-		redisPool.returnResourceObject(rds);
+		redisPool.returnResource(rds);
 	}
 	
 	public boolean exists() {
 		ShardedJedis rds = redisPool.getResource();
-		boolean ex = rds.exists(dirName);
-		redisPool.returnResourceObject(rds);
+		boolean ex = rds.exists(getDirNameBytes());
+		redisPool.returnResource(rds);
 		return ex;
 	}
 	
@@ -65,13 +70,15 @@ public class RedisDirectory extends Directory implements Serializable {
 	
 	private long dirSize() throws IOException {
 		long ret = 0;
-		String[] names = listAll();
-		if( names == null )
+		
+		ShardedJedis rds = redisPool.getResource();
+		Map<byte[], byte[]> lst = rds.hgetAll(getDirNameBytes());
+		if( lst == null || lst.size() < 1)
 			return 0;
-		for(String name: names){
-			RedisFile fl = new RedisFile(name, this, redisPool);
-			ret += fl.size();
+		for(byte[] sz: lst.values() ){
+			try{ ret += ByteBuffer.wrap(sz).asLongBuffer().get(); }catch(Exception e){}
 		}
+		redisPool.returnResource(rds);
 		return ret;
 	}
 
@@ -79,7 +86,7 @@ public class RedisDirectory extends Directory implements Serializable {
 	public synchronized void close() throws IOException {
 		ShardedJedis rds = redisPool.getResource();
 		directorySize = dirSize();
-		rds.hset(dirName, ":size", Long.toString(directorySize));
+		rds.hset(getDirNameBytes(), ":size".getBytes(), ByteBuffer.allocate(Long.SIZE/8).putLong(directorySize).array());
 		
 		//Issue save on each
 		Collection<Jedis> ls = rds.getAllShards();
@@ -96,9 +103,6 @@ public class RedisDirectory extends Directory implements Serializable {
 
 	@Override
 	public IndexOutput createOutput(String filename) throws IOException {
-		ShardedJedis rds = redisPool.getResource();
-		rds.hset(dirName, "@"+filename, "");
-		redisPool.returnResourceObject(rds);
 		return new RedisFileOutputStream( new RedisFile(filename, this, redisPool) );
 	}
 
@@ -111,7 +115,7 @@ public class RedisDirectory extends Directory implements Serializable {
 	public boolean fileExists(String filename) throws IOException {
 		boolean ret = false;
 		ShardedJedis rds = redisPool.getResource();
-		ret = rds.hexists(dirName, "@"+filename);
+		ret = rds.hexists(getDirNameBytes(), filename.getBytes());
 		redisPool.returnResourceObject(rds);
 		return ret;
 	}
@@ -159,6 +163,12 @@ public class RedisDirectory extends Directory implements Serializable {
 	
 	public String getDirName() {
 		return dirName;
+	}
+	
+	public byte[] getDirNameBytes() {
+		if( dirNameBytes == null )
+			dirNameBytes = dirName.getBytes();
+		return dirNameBytes;
 	}
 
 }
