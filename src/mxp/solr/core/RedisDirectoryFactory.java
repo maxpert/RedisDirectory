@@ -2,7 +2,6 @@ package mxp.solr.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import mxp.lucene.store.RedisDirectory;
@@ -46,7 +45,7 @@ public class RedisDirectoryFactory extends DirectoryFactory{
 	}
 	
 	@Override
-	public void init(NamedList list) {
+	public void init(@SuppressWarnings("rawtypes") NamedList list) {
 		super.init(list);
 		SolrParams params = SolrParams.toSolrParams( list );
 		List<JedisShardInfo> info = loadShardsInfo(params);

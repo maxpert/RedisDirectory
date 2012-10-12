@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
-import org.apache.lucene.store.SingleInstanceLockFactory;
+import org.apache.lucene.store.LockFactory;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
@@ -28,10 +28,16 @@ public class RedisDirectory extends Directory implements Serializable {
 		dirName = name;
 		open();
 		try {
-			setLockFactory(new SingleInstanceLockFactory());
+			setLockFactory(new RedisLockFactory(pool));
 		} catch (IOException e) {
-			// Cannot happen
+			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void setLockFactory(LockFactory lockFactory) throws IOException {
+		if(lockFactory instanceof RedisLockFactory)
+			super.setLockFactory(lockFactory);
 	}
 	
 	private void open() {
