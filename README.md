@@ -1,7 +1,7 @@
 Redis storage engine for Lucene 
 ===============================
 
-_The repo is under baby stages and in no way production ready; yet it lays the fundamental foundation and aims to be usable in production_. You can read about [my blog post here](http://blog.creapptives.com/post/33172587388/smoking-lucene-on-redis).
+**I am not maintaining or developing this project anymore, however it does a proof of concept to replace Lucene's storage engine Redis (can be distributed filesystem)**. You can read about [my blog post here](http://blog.creapptives.com/post/33172587388/smoking-lucene-on-redis).
 
 
 Requirements
