@@ -94,7 +94,7 @@ Each name shard points to the redis host string (UNIX sock files yet to come). A
 TODO
 ----
 
-I've just started. Have to:
+Still missing features are: 
 
 *   Include support for Snappy compression to compress file block.
 *   Rock solid JUNIT test cases for each class.
